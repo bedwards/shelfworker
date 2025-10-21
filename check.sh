@@ -2,7 +2,7 @@
 set -e
 
 echo "🔍 Running ESLint..."
-npm run lint
+npm run lint -- --fix
 
 echo ""
 echo "🧪 Running tests with coverage..."
