@@ -20,6 +20,10 @@ Public-domain ebook library using GraphQL (Neon/pg_graphql) and FerretDB. Explor
 
 Install dependencies:
 ```bash
+# first time around
+npm install
+
+# clean install
 npm ci
 ```
 
