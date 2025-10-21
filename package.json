@@ -1,0 +1,44 @@
+{
+  "name": "shelfworker",
+  "version": "1.0.0",
+  "description": "Public-domain ebook demo using GraphQL (Neon/pg_graphql) and FerretDB",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "check": "./check.sh"
+  },
+  "keywords": [
+    "ebooks",
+    "gutenberg",
+    "graphql",
+    "ferretdb",
+    "cloudflare"
+  ],
+  "author": "bedwards",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.17.0",
+    "happy-dom": "^18.0.1",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "mongodb": "^6.20.0",
+    "pg": "^8.16.3"
+  },
+  "main": "app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bedwards/shelfworker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bedwards/shelfworker/issues"
+  },
+  "homepage": "https://github.com/bedwards/shelfworker#readme"
+}

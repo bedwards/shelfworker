@@ -1,0 +1,8 @@
+name = "shelfworker-api"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+node_compat = true
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
