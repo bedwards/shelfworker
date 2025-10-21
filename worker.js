@@ -45,7 +45,7 @@ export default {
 
 async function handleGetBooks(env) {
   const pgClient = new Client({ connectionString: env.DATABASE_URL });
-  
+
   try {
     await pgClient.connect();
 
@@ -71,13 +71,16 @@ async function handleGetBooks(env) {
 
     const result = await pgClient.query(query);
     const data = result.rows[0].resolve.data;
-    
+
     if (data && data.booksCollection && data.booksCollection.edges) {
       const books = data.booksCollection.edges.map(edge => edge.node);
       return jsonResponse(books);
     }
 
     return jsonResponse([]);
+  } catch (error) {
+    console.error('Worker error:', error);
+    return jsonResponse({ error: error.message }, 500);
   } finally {
     await pgClient.end();
   }
@@ -85,14 +88,14 @@ async function handleGetBooks(env) {
 
 async function handleGetLibrary(env) {
   const mongoClient = new MongoClient(env.FERRETDB_URL);
-  
+
   try {
     await mongoClient.connect();
     const db = mongoClient.db('shelfworker');
     const library = db.collection('library');
-    
+
     const books = await library.find({}).toArray();
-    
+
     return jsonResponse(books.map(book => ({
       gutenberg_id: book.gutenberg_id,
       title: book.title,
@@ -110,13 +113,14 @@ async function handleGetLibrary(env) {
 async function handleAddToLibrary(request, env) {
   const book = await request.json();
   const mongoClient = new MongoClient(env.FERRETDB_URL);
-  
+
   try {
     await mongoClient.connect();
     const db = mongoClient.db('shelfworker');
     const library = db.collection('library');
-    
+
     const existing = await library.findOne({ gutenberg_id: book.gutenberg_id });
+
     if (existing) {
       return jsonResponse({ message: 'Book already in library' }, 200);
     }
@@ -141,16 +145,16 @@ async function handleAddToLibrary(request, env) {
 async function handleRemoveFromLibrary(request, env) {
   const url = new URL(request.url);
   const gutenberg_id = parseInt(url.pathname.split('/').pop());
-  
+
   const mongoClient = new MongoClient(env.FERRETDB_URL);
-  
+
   try {
     await mongoClient.connect();
     const db = mongoClient.db('shelfworker');
     const library = db.collection('library');
-    
+
     await library.deleteOne({ gutenberg_id });
-    
+
     return jsonResponse({ message: 'Book removed from library' });
   } finally {
     await mongoClient.close();

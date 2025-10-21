@@ -33,7 +33,7 @@ function setupEventListeners() {
 function switchView(view) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  
+
   document.querySelector(`[data-view="${view}"]`).classList.add('active');
   document.getElementById(`${view}-view`).classList.add('active');
 
@@ -47,7 +47,7 @@ async function loadCatalog() {
     const response = await fetch(`${API_BASE}/api/books`);
     const data = await response.json();
     catalogBooks = data;
-    
+
     catalogBooks.forEach(book => {
       if (book.genres) genres.add(...book.genres);
       if (book.decade) decades.add(book.decade);
@@ -95,7 +95,7 @@ function applyFilters() {
   const decade = document.getElementById('decade-filter').value;
 
   const filtered = catalogBooks.filter(book => {
-    const matchesSearch = !search || 
+    const matchesSearch = !search ||
       book.title.toLowerCase().includes(search) ||
       book.author.toLowerCase().includes(search);
     const matchesGenre = !genre || (book.genres && book.genres.includes(genre));
@@ -116,7 +116,7 @@ function clearFilters() {
 function renderCatalog(books = catalogBooks) {
   const catalog = document.getElementById('catalog');
   const loading = document.getElementById('loading');
-  
+
   loading.style.display = 'none';
   catalog.innerHTML = '';
 
@@ -166,7 +166,7 @@ function createBookCard(book, inLibrary, isLibraryView = false) {
 
   const meta = document.createElement('div');
   meta.className = 'book-meta';
-  
+
   if (book.decade) {
     const decadeBadge = document.createElement('span');
     decadeBadge.className = 'badge decade';
@@ -182,7 +182,7 @@ function createBookCard(book, inLibrary, isLibraryView = false) {
       meta.appendChild(genreBadge);
     });
   }
-  
+
   card.appendChild(meta);
 
   const actions = document.createElement('div');
@@ -235,7 +235,7 @@ function createBookCard(book, inLibrary, isLibraryView = false) {
 async function addToLibrary(book, button) {
   button.disabled = true;
   button.textContent = 'Adding...';
-  
+
   console.log('Adding to library:', book.title);
 
   try {
@@ -291,7 +291,7 @@ async function removeFromLibrary(book, card) {
 async function previewBook(book) {
   const modal = document.getElementById('preview-modal');
   const content = document.getElementById('preview-content');
-  
+
   content.innerHTML = '<div class="loading">Loading preview...</div>';
   modal.classList.add('active');
 

@@ -6,18 +6,24 @@ const mockPgClient = {
   end: vi.fn()
 };
 
+// Create persistent collection mock
+const mockCollection = {
+  find: vi.fn(() => ({
+    toArray: vi.fn(() => Promise.resolve([]))
+  })),
+  findOne: vi.fn(() => Promise.resolve(null)),
+  insertOne: vi.fn(() => Promise.resolve()),
+  deleteOne: vi.fn(() => Promise.resolve())
+};
+
+// Create persistent db mock
+const mockDb = {
+  collection: vi.fn(() => mockCollection)
+};
+
 const mockMongoClient = {
   connect: vi.fn(),
-  db: vi.fn(() => ({
-    collection: vi.fn(() => ({
-      find: vi.fn(() => ({
-        toArray: vi.fn(() => Promise.resolve([]))
-      })),
-      findOne: vi.fn(() => Promise.resolve(null)),
-      insertOne: vi.fn(() => Promise.resolve()),
-      deleteOne: vi.fn(() => Promise.resolve())
-    }))
-  })),
+  db: vi.fn(() => mockDb),
   close: vi.fn()
 };
 
@@ -37,7 +43,13 @@ describe('Worker', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    
+
+    // Reset mock implementations to defaults
+    mockCollection.findOne.mockResolvedValue(null);
+    mockCollection.find.mockReturnValue({
+      toArray: vi.fn(() => Promise.resolve([]))
+    });
+
     env = {
       DATABASE_URL: 'postgresql://test',
       FERRETDB_URL: 'mongodb://test'
@@ -53,7 +65,7 @@ describe('Worker', () => {
       });
 
       const response = await worker.default.fetch(request, env);
-      
+
       expect(response.status).toBe(204);
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
     });
@@ -79,7 +91,7 @@ describe('Worker', () => {
 
       const request = new Request('http://localhost/api/books');
       const response = await worker.default.fetch(request, env);
-      
+
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(Array.isArray(data)).toBe(true);
@@ -94,7 +106,7 @@ describe('Worker', () => {
 
       const request = new Request('http://localhost/api/books');
       const response = await worker.default.fetch(request, env);
-      
+
       const data = await response.json();
       expect(data).toEqual([]);
     });
@@ -104,7 +116,7 @@ describe('Worker', () => {
     it('returns library books from FerretDB', async () => {
       const request = new Request('http://localhost/api/library');
       const response = await worker.default.fetch(request, env);
-      
+
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(Array.isArray(data)).toBe(true);
@@ -128,14 +140,14 @@ describe('Worker', () => {
       });
 
       const response = await worker.default.fetch(request, env);
-      
+
       expect(response.status).toBe(201);
       const data = await response.json();
       expect(data.message).toBeDefined();
     });
 
     it('handles existing book', async () => {
-      mockMongoClient.db().collection().findOne.mockResolvedValueOnce({ gutenberg_id: 1 });
+      mockCollection.findOne.mockResolvedValueOnce({ gutenberg_id: 1 });
 
       const book = { gutenberg_id: 1, title: 'Test', author: 'Author' };
 
@@ -146,7 +158,7 @@ describe('Worker', () => {
       });
 
       const response = await worker.default.fetch(request, env);
-      
+
       expect(response.status).toBe(200);
     });
   });
@@ -158,7 +170,7 @@ describe('Worker', () => {
       });
 
       const response = await worker.default.fetch(request, env);
-      
+
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data.message).toBeDefined();
@@ -169,7 +181,7 @@ describe('Worker', () => {
     it('returns 404 for unknown routes', async () => {
       const request = new Request('http://localhost/api/unknown');
       const response = await worker.default.fetch(request, env);
-      
+
       expect(response.status).toBe(404);
     });
 
@@ -178,7 +190,7 @@ describe('Worker', () => {
 
       const request = new Request('http://localhost/api/books');
       const response = await worker.default.fetch(request, env);
-      
+
       expect(response.status).toBe(500);
     });
   });
@@ -191,7 +203,7 @@ describe('Worker', () => {
       });
 
       const response = await worker.default.fetch(request, env);
-      
+
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
     });
   });

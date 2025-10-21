@@ -1,16 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { JSDOM } from 'happy-dom';
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 describe('App', () => {
-  let dom;
-  let document;
-  let window;
-  
   beforeEach(() => {
-    dom = new JSDOM(`
+    document.body.innerHTML = `
       <!DOCTYPE html>
       <html>
         <body>
@@ -40,22 +35,20 @@ describe('App', () => {
           </div>
         </body>
       </html>
-    `);
-    
-    document = dom.window.document;
-    window = dom.window;
+    `;
+
     global.document = document;
     global.window = window;
-    
+
     mockFetch.mockClear();
   });
 
   describe('loadCatalog', () => {
     it('fetches books from API', async () => {
       const mockBooks = [
-        { 
-          gutenberg_id: 1, 
-          title: 'Test Book', 
+        {
+          gutenberg_id: 1,
+          title: 'Test Book',
           author: 'Test Author',
           genres: ['Fiction'],
           decade: 1900,
@@ -63,7 +56,7 @@ describe('App', () => {
           text_url: 'http://example.com/book.txt'
         }
       ];
-      
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockBooks
@@ -91,7 +84,7 @@ describe('App', () => {
       const mockLibrary = [
         { gutenberg_id: 1, title: 'Library Book', author: 'Author' }
       ];
-      
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockLibrary
@@ -120,7 +113,7 @@ describe('App', () => {
       };
 
       const button = document.createElement('button');
-      
+
       const { addToLibrary } = await import('../app.js');
       await addToLibrary(book, button);
 
@@ -135,12 +128,12 @@ describe('App', () => {
 
     it('handles add errors', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Failed'));
-      
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => { });
 
       const book = { gutenberg_id: 1, title: 'Test', author: 'Author' };
       const button = document.createElement('button');
-      
+
       const { addToLibrary } = await import('../app.js');
       await addToLibrary(book, button);
 
@@ -157,7 +150,7 @@ describe('App', () => {
 
       const book = { gutenberg_id: 1, title: 'Test', author: 'Author' };
       const card = document.createElement('div');
-      
+
       const { removeFromLibrary } = await import('../app.js');
       await removeFromLibrary(book, card);
 
@@ -171,7 +164,7 @@ describe('App', () => {
   describe('initialization', () => {
     it('sets up event listeners', async () => {
       const { init } = await import('../app.js');
-      
+
       mockFetch.mockResolvedValue({
         ok: true,
         json: async () => []
@@ -190,7 +183,7 @@ describe('App', () => {
         { gutenberg_id: 1, title: 'Pride and Prejudice', author: 'Austen', genres: [], decade: 1810 },
         { gutenberg_id: 2, title: 'Moby Dick', author: 'Melville', genres: [], decade: 1850 }
       ];
-      
+
       mockFetch.mockResolvedValue({ ok: true, json: async () => mockBooks });
 
       const { init } = await import('../app.js');
@@ -201,7 +194,7 @@ describe('App', () => {
       searchInput.dispatchEvent(new window.Event('input'));
 
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       expect(document.getElementById('catalog').children.length).toBeGreaterThan(0);
     });
   });

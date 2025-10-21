@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest run",
-    "test:watch": "vitest",
+    "test:watch": "vitest --silent --reporter=dot --bail 1",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "check": "./check.sh"
